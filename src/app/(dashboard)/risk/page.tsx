@@ -1,0 +1,9 @@
+'use client';
+import { useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { PageHeader } from '@/components/layout/page-header';
+import { Skeleton } from '@/components/ui/skeleton';
+import { ErrorState } from '@/components/feedback/error-state';
+import { RiskTable } from '@/components/risk/risk-table';
+import { listRiskFlags, updateRiskFlag, type RiskStatus } from '@/features/risk/admin-risk-api';
+export default function RiskPage(){const [status,setStatus]=useState<RiskStatus|'ALL'>('OPEN');const [pendingId,setPendingId]=useState<string>();const qc=useQueryClient();const q=useQuery({queryKey:['admin','risk',status],queryFn:()=>listRiskFlags(status,100)});const mut=useMutation({mutationFn:({id,status}:{id:string;status:'REVIEWED'|'DISMISSED'})=>updateRiskFlag(id,status),onMutate:v=>setPendingId(v.id),onSettled:()=>setPendingId(undefined),onSuccess:async()=>{await Promise.all([qc.invalidateQueries({queryKey:['admin','risk']}),qc.invalidateQueries({queryKey:['admin','dashboard']}),qc.invalidateQueries({queryKey:['admin','audit']})])}});return <><PageHeader eyebrow='Trust & safety' title='Risk & anti-cheat' description='Review deterministic backend risk signals. Flags support investigation; they do not automatically ban players or move money.' actions={<select className='h-10 rounded-lg border bg-background px-3 text-sm' value={status} onChange={e=>setStatus(e.target.value as RiskStatus|'ALL')}><option value='OPEN'>Open</option><option value='REVIEWED'>Reviewed</option><option value='DISMISSED'>Dismissed</option><option value='ALL'>All</option></select>}/>{q.isLoading?<Skeleton className='h-[520px]'/>:q.isError||!q.data?<ErrorState message='Could not load risk flags.' onRetry={()=>void q.refetch()}/>:<RiskTable items={q.data} pendingId={pendingId} onReview={id=>mut.mutate({id,status:'REVIEWED'})} onDismiss={id=>mut.mutate({id,status:'DISMISSED'})}/>}</>}

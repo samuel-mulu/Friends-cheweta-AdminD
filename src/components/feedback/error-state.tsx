@@ -1,0 +1,2 @@
+import { AlertTriangle } from 'lucide-react'; import { Button } from '@/components/ui/button';
+export function ErrorState({ message='Something went wrong.', onRetry }: { message?: string; onRetry?: () => void }) { return <div className='flex min-h-44 flex-col items-center justify-center rounded-xl border border-dashed p-8 text-center'><AlertTriangle className='mb-3 h-5 w-5 text-amber-500'/><p className='text-sm text-muted-foreground'>{message}</p>{onRetry && <Button className='mt-4' variant='outline' size='sm' onClick={onRetry}>Try again</Button>}</div>; }

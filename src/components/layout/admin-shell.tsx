@@ -1,0 +1,2 @@
+import { Sidebar } from './sidebar'; import { Topbar } from './topbar'; import { MobileNav } from './mobile-nav';
+export function AdminShell({children}:{children:React.ReactNode}){return <div className='min-h-screen bg-background lg:flex'><Sidebar/><div className='min-w-0 flex-1'><Topbar/><main className='mx-auto w-full max-w-[1500px] p-5 pb-24 md:p-7 lg:pb-8'>{children}</main><MobileNav/></div></div>}

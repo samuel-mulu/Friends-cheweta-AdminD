@@ -1,0 +1,3 @@
+'use client';
+import { useEffect } from 'react'; import { usePathname, useRouter } from 'next/navigation'; import { useAuth } from './auth-provider';
+export function AuthGate({ children }: { children: React.ReactNode }) { const {user,loading}=useAuth(); const router=useRouter(); const pathname=usePathname(); useEffect(()=>{ if(!loading && !user) router.replace(`/login?next=${encodeURIComponent(pathname)}`); },[loading,user,router,pathname]); if(loading) return <div className='grid min-h-screen place-items-center bg-background'><div className='h-8 w-8 animate-spin rounded-full border-2 border-muted border-t-primary'/></div>; if(!user) return null; return <>{children}</>; }

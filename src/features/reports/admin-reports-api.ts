@@ -1,0 +1,4 @@
+import { apiFetch } from '@/lib/api/client';
+export interface ReportDaily { date:string; newPlayers:number; matchesCreated:number; matchesFinished:number; matchesCancelled:number; settlements:number; platformFeeMinor:string; approvedDepositMinor:string; approvedWithdrawalMinor:string; riskFlags:number }
+export interface AdminReport { range:{days:number;start:string;end:string}; summary:{newPlayers:number;matchesCreated:number;matchesFinished:number;matchesCancelled:number;completionRate:number;totalPotMinor:string;platformFeeMinor:string;payoutMinor:string;approvedDepositMinor:string;approvedWithdrawalMinor:string;riskFlags:number}; daily:ReportDaily[]; gameModes:{gameModeId:string;code:string;name:string;matches:number}[] }
+export const getAdminReport=(days=30)=>apiFetch<AdminReport>(`/admin/reports?days=${days}`);

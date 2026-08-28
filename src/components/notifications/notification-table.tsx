@@ -1,0 +1,8 @@
+import { Badge } from '@/components/ui/badge';
+import { formatDateTime } from '@/lib/formatters/date';
+import type { AdminNotification } from '@/features/notifications/admin-notifications-api';
+
+export function NotificationTable({ items }: { items: AdminNotification[] }) {
+  if (!items.length) return <div className='rounded-xl border bg-card p-8 text-center text-sm text-muted-foreground'>No notifications found.</div>;
+  return <div className='overflow-hidden rounded-xl border bg-card'><div className='overflow-x-auto'><table className='w-full min-w-[900px] text-left text-sm'><thead className='border-b bg-muted/40 text-xs uppercase tracking-wide text-muted-foreground'><tr><th className='px-4 py-3'>Player</th><th className='px-4 py-3'>Type</th><th className='px-4 py-3'>Message</th><th className='px-4 py-3'>Read</th><th className='px-4 py-3'>Created</th></tr></thead><tbody>{items.map(item=><tr key={item.id} className='border-b last:border-0'><td className='px-4 py-4'><div className='font-medium'>{item.user.fullName}</div><div className='text-xs text-muted-foreground'>{item.user.phoneNumber}</div></td><td className='px-4 py-4'><Badge variant='secondary'>{item.type}</Badge></td><td className='max-w-[420px] px-4 py-4'><div className='font-medium'>{item.title}</div><div className='mt-1 line-clamp-2 text-muted-foreground'>{item.message}</div></td><td className='px-4 py-4'>{item.readAt?<span className='text-muted-foreground'>Read</span>:<Badge>Unread</Badge>}</td><td className='px-4 py-4 text-muted-foreground'>{formatDateTime(item.createdAt)}</td></tr>)}</tbody></table></div></div>;
+}
