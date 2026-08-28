@@ -1,7 +1,7 @@
 import { adminSession } from '@/lib/auth/session';
+import { CLIENT_API_BASE } from '@/lib/config/client-config';
 import type { ApiErrorBody } from '@/types/api';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:5000/api';
 let refreshPromise: Promise<boolean> | null = null;
 
 export class ApiError extends Error {
@@ -13,7 +13,7 @@ async function refreshSession(): Promise<boolean> {
   refreshPromise = (async () => {
     const refreshToken = adminSession.getRefreshToken();
     if (!refreshToken) return false;
-    const response = await fetch(`${API_URL}/auth/refresh`, {
+    const response = await fetch(`${CLIENT_API_BASE}/auth/refresh`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ refreshToken }),
     });
     if (!response.ok) { adminSession.clear(); return false; }
@@ -29,7 +29,7 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}, allowRet
   const headers = new Headers(init.headers);
   if (!headers.has('Content-Type') && init.body) headers.set('Content-Type', 'application/json');
   if (token) headers.set('Authorization', `Bearer ${token}`);
-  const response = await fetch(`${API_URL}${path}`, { ...init, headers, cache: 'no-store' });
+  const response = await fetch(`${CLIENT_API_BASE}${path}`, { ...init, headers, cache: 'no-store' });
   if (response.status === 401 && allowRetry && await refreshSession()) return apiFetch<T>(path, init, false);
   if (!response.ok) {
     let body: ApiErrorBody = {};
