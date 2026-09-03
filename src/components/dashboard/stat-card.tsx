@@ -1,2 +1,48 @@
-import type { LucideIcon } from 'lucide-react'; import { Card } from '@/components/ui/card';
-export function StatCard({label,value,description,icon:Icon,tone='default'}:{label:string;value:string|number;description?:string;icon:LucideIcon;tone?:'default'|'warning'|'danger'|'success'}){const tones={default:'bg-muted text-muted-foreground',warning:'bg-amber-500/10 text-amber-700 dark:text-amber-300',danger:'bg-red-500/10 text-red-700 dark:text-red-300',success:'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'}; return <Card className='p-5'><div className='flex items-start justify-between gap-4'><div><p className='text-sm font-medium text-muted-foreground'>{label}</p><p className='mt-3 text-3xl font-semibold tracking-tight'>{value}</p>{description&&<p className='mt-2 text-xs text-muted-foreground'>{description}</p>}</div><div className={`rounded-lg p-2.5 ${tones[tone]}`}><Icon className='h-5 w-5'/></div></div></Card>}
+import Link from 'next/link';
+import type { LucideIcon } from 'lucide-react';
+import { Card } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
+
+export function StatCard({
+  label,
+  value,
+  description,
+  icon: Icon,
+  tone = 'default',
+  href,
+}: {
+  label: string;
+  value: string | number;
+  description?: string;
+  icon: LucideIcon;
+  tone?: 'default' | 'warning' | 'danger' | 'success';
+  href?: string;
+}) {
+  const tones = {
+    default: 'bg-muted text-muted-foreground',
+    warning: 'bg-amber-500/10 text-amber-700 dark:text-amber-300',
+    danger: 'bg-red-500/10 text-red-700 dark:text-red-300',
+    success: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300',
+  };
+
+  const body = (
+    <div className='flex items-start justify-between gap-4'>
+      <div>
+        <p className='text-sm font-medium text-muted-foreground'>{label}</p>
+        <p className='mt-3 text-3xl font-semibold tracking-tight'>{value}</p>
+        {description ? <p className='mt-2 text-xs text-muted-foreground'>{description}</p> : null}
+      </div>
+      <div className={`rounded-lg p-2.5 ${tones[tone]}`}>
+        <Icon className='h-5 w-5' />
+      </div>
+    </div>
+  );
+
+  if (!href) return <Card className='p-5'>{body}</Card>;
+
+  return (
+    <Link href={href} className='block'>
+      <Card className={cn('p-5 transition-colors hover:bg-muted/40')}>{body}</Card>
+    </Link>
+  );
+}
