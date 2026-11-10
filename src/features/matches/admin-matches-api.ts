@@ -16,7 +16,8 @@ export interface MatchEntry { id: string; userId: string; amountMinor: string; s
 export interface MatchSettlement {
   id: string;
   matchId: string;
-  winnerUserId: string;
+  /** Null for a draw (stakes returned). */
+  winnerUserId: string | null;
   potAmountMinor: string;
   platformFeeMinor: string;
   payoutAmountMinor: string;
@@ -33,6 +34,8 @@ export interface AdminMatch {
   cancelledAt?: string|null;
   cancellationReason?: string|null;
   winnerOrder?: unknown;
+  /** Finished without a winner (Dama draw rule). */
+  isDraw?: boolean;
   resultVersion?: number|null;
   createdAt: string;
   startedAt?: string|null;
