@@ -33,12 +33,20 @@ npm run build
 npm run dev
 ```
 
-Development environment:
+Development environment (server-only, copy into `.env.local`):
 
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:5000/api
-NEXT_PUBLIC_SOCKET_URL=http://localhost:5000
-NEXT_PUBLIC_APP_NAME=Friends Game Hub
+API_URL=http://localhost:5000/api
+SOCKET_URL=http://localhost:5000
+```
+
+The browser calls this Next.js app. REST is proxied at `/api/backend`. The Socket.IO URL is loaded at runtime from `/api/runtime-config`.
+
+Production on the VPS:
+
+```bash
+cp .env.production.example .env
+docker compose -f compose.prod.yml up -d --build
 ```
 
 Use the accompanying `friends-game-backend-b0-b20-admin-support-a17` backend package for the complete A0-A17 contract.
