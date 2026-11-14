@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } 
 import { createGameMode } from '@/features/games/admin-games-api';
 /** Rules versions each live game supports (newest first) and its default move time. */
 export const RULES_VERSIONS: Record<string, { versions: string[]; turnSeconds: number; label: string }> = {
-  LUDO: { versions: ['LUDO_CLASSIC_V2', 'LUDO_CLASSIC_V1'], turnSeconds: 30, label: 'Ludo' },
+  LUDO: { versions: ['LUDO_CLASSIC_V3', 'LUDO_CLASSIC_V2', 'LUDO_CLASSIC_V1'], turnSeconds: 30, label: 'Ludo' },
   KARTA: { versions: ['KARTA_LATLAT_V1'], turnSeconds: 15, label: 'Karta Lat Lat' },
   DAMA: { versions: ['DAMA_ET_V1'], turnSeconds: 40, label: 'Dama' },
 };
