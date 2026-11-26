@@ -1,10 +1,50 @@
 'use client';
+
 import { useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { WithdrawalTable } from '@/components/payments/withdrawal-table';
 import { PageHeader } from '@/components/layout/page-header';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ErrorState } from '@/components/feedback/error-state';
-import { WithdrawalTable } from '@/components/payments/withdrawal-table';
-import { approveWithdrawal, listWithdrawals, rejectWithdrawal, type PaymentStatus } from '@/features/payments/admin-payments-api';
-export default function WithdrawalsPage(){const [status,setStatus]=useState<PaymentStatus|''>('PENDING'); const qc=useQueryClient(); const q=useQuery({queryKey:['admin','withdrawals',status],queryFn:()=>listWithdrawals(status||undefined)}); const [pendingId,setPendingId]=useState<string>(); const refresh=async()=>{await Promise.all([qc.invalidateQueries({queryKey:['admin','withdrawals']}),qc.invalidateQueries({queryKey:['admin','dashboard']}),qc.invalidateQueries({queryKey:['admin','wallet-transactions']})]);}; const approve=useMutation({mutationFn:approveWithdrawal,onMutate:id=>setPendingId(id),onSettled:()=>setPendingId(undefined),onSuccess:refresh}); const reject=useMutation({mutationFn:({id,reason}:{id:string;reason:string})=>rejectWithdrawal(id,reason),onMutate:v=>setPendingId(v.id),onSettled:()=>setPendingId(undefined),onSuccess:refresh}); return <><PageHeader eyebrow='Payments' title='Withdrawals' description='Review locked withdrawal requests. Approve consumes locked funds; reject releases them back to available balance.' actions={<StatusFilter value={status} onChange={setStatus}/>}/>{q.isLoading?<Skeleton className='h-[520px]'/>:q.isError||!q.data?<ErrorState message='Could not load withdrawals.' onRetry={()=>void q.refetch()}/>:<WithdrawalTable items={q.data} pendingId={pendingId} onApprove={id=>approve.mutate(id)} onReject={(id,reason)=>reject.mutate({id,reason})}/>}</>}
-function StatusFilter({value,onChange}:{value:PaymentStatus|'';onChange:(v:PaymentStatus|'')=>void}){return <select className='h-10 rounded-lg border bg-background px-3 text-sm' value={value} onChange={e=>onChange(e.target.value as PaymentStatus|'')}><option value=''>All statuses</option><option value='PENDING'>Pending</option><option value='APPROVED'>Approved</option><option value='REJECTED'>Rejected</option></select>}
+import {
+  approveWithdrawal, listWithdrawals, rejectWithdrawal, type PaymentStatus,
+} from '@/features/payments/admin-payments-api';
+
+export default function WithdrawalsPage() {
+  const [status, setStatus] = useState<PaymentStatus | ''>('PENDING');
+  const queryClient = useQueryClient();
+  const query = useQuery({ queryKey: ['admin', 'withdrawals', status], queryFn: () => listWithdrawals(status || undefined) });
+
+  async function review(operation: Promise<unknown>) {
+    await operation;
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['admin', 'withdrawals'] }),
+      queryClient.invalidateQueries({ queryKey: ['admin', 'dashboard'] }),
+      queryClient.invalidateQueries({ queryKey: ['admin', 'wallet-transactions'] }),
+    ]);
+  }
+
+  return (
+    <>
+      <PageHeader eyebrow='Payments' title='Withdrawals' description='Review reserved withdrawals and record payout receipts.'
+        actions={(
+          <select aria-label='Filter by status' className='h-10 rounded-lg border bg-background px-3 text-sm'
+            value={status} onChange={(event) => setStatus(event.target.value as PaymentStatus | '')}>
+            <option value=''>All statuses</option>
+            <option value='PENDING'>Pending</option>
+            <option value='PAID'>Paid</option>
+            <option value='APPROVED'>Legacy approvals</option>
+            <option value='REJECTED'>Rejected</option>
+          </select>
+        )}
+      />
+      {query.isLoading && <Skeleton className='h-[520px]' />}
+      {query.isError && <ErrorState message='Could not load withdrawals.' onRetry={() => void query.refetch()} />}
+      {query.data && <WithdrawalTable
+        items={query.data}
+        onApprove={(id, value) => review(approveWithdrawal(id, value))}
+        onReject={(id, reason) => review(rejectWithdrawal(id, reason))}
+      />}
+    </>
+  );
+}

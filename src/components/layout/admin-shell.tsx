@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { Sidebar } from './sidebar';
 import { Topbar } from './topbar';
+import { AdminRealtimeProvider } from '@/features/realtime/admin-realtime-provider';
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -23,12 +24,14 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   }, [mobileOpen]);
 
   return (
-    <div className='min-h-screen bg-background lg:flex'>
-      <Sidebar mobileOpen={mobileOpen} onMobileClose={() => setMobileOpen(false)} />
-      <div className='min-w-0 flex-1'>
-        <Topbar onMenuClick={() => setMobileOpen(true)} />
-        <main className='mx-auto w-full max-w-[1500px] p-4 sm:p-5 md:p-7'>{children}</main>
+    <AdminRealtimeProvider>
+      <div className='min-h-screen bg-background lg:flex'>
+        <Sidebar mobileOpen={mobileOpen} onMobileClose={() => setMobileOpen(false)} />
+        <div className='min-w-0 flex-1'>
+          <Topbar onMenuClick={() => setMobileOpen(true)} />
+          <main className='mx-auto w-full max-w-[1500px] p-4 sm:p-5 md:p-7'>{children}</main>
+        </div>
       </div>
-    </div>
+    </AdminRealtimeProvider>
   );
 }

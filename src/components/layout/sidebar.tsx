@@ -1,6 +1,8 @@
 'use client';
 
 import Link from 'next/link';
+import { useQuery } from '@tanstack/react-query';
+import { feedbackCountKey, openFeedbackCount } from '@/features/communications/communications-api';
 import { usePathname } from 'next/navigation';
 import {
   Activity,
@@ -11,6 +13,8 @@ import {
   Gamepad2,
   Landmark,
   LineChart,
+  Megaphone,
+  MessageSquareReply,
   ScrollText,
   ServerCog,
   Settings,
@@ -30,6 +34,7 @@ const primary = [
 const finance = [
   { href: '/wallet-transactions', label: 'Wallet & ledger', icon: WalletCards },
   { href: '/deposits', label: 'Deposits', icon: Landmark },
+  { href: '/deposit-config', label: 'Deposit configuration', icon: Settings },
   { href: '/withdrawals', label: 'Withdrawals', icon: ArrowDownToLine },
   { href: '/settlements', label: 'Settlements', icon: BadgeDollarSign },
 ];
@@ -41,6 +46,10 @@ const operations = [
   { href: '/realtime', label: 'Realtime operations', icon: Activity },
   { href: '/risk', label: 'Risk & anti-cheat', icon: ShieldAlert },
   { href: '/audit', label: 'Audit logs', icon: ScrollText },
+];
+const communications = [
+  { href: '/broadcasts', label: 'Broadcasts', icon: Megaphone },
+  { href: '/feedback', label: 'Feedback', icon: MessageSquareReply },
   { href: '/notifications', label: 'Notifications', icon: Bell },
 ];
 const intelligence = [
@@ -54,10 +63,12 @@ function NavLink({
   Icon,
   path,
   onNavigate,
+  count,
 }: {
   href: string;
   label: string;
   Icon: typeof BarChart3;
+  count?: number;
   path: string;
   onNavigate?: () => void;
 }) {
@@ -66,6 +77,7 @@ function NavLink({
     <Link
       href={href}
       onClick={onNavigate}
+      aria-current={active ? 'page' : undefined}
       className={cn(
         'mb-1 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
         active ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground',
@@ -73,6 +85,7 @@ function NavLink({
     >
       <Icon className='h-[18px] w-[18px]' />
       {label}
+      {count != null && count > 0 && <span aria-label={`${count} open feedback items`} className='ml-auto rounded-full bg-primary px-2 text-xs text-primary-foreground'>{count > 99 ? '99+' : count}</span>}
     </Link>
   );
 }
@@ -88,6 +101,7 @@ function SidebarBody({
   showClose?: boolean;
   onClose?: () => void;
 }) {
+  const feedback = useQuery({ queryKey: feedbackCountKey, queryFn: openFeedbackCount });
   return (
     <>
       <div className='flex h-16 items-center gap-3 border-b px-5'>
@@ -122,6 +136,13 @@ function SidebarBody({
         </p>
         {games.map((item) => (
           <NavLink key={item.href} {...item} Icon={item.icon} path={path} onNavigate={onNavigate} />
+        ))}
+        <p className='px-3 pb-2 pt-6 text-[11px] font-semibold uppercase tracking-[.14em] text-muted-foreground'>
+          Player communication
+        </p>
+        {communications.map((item) => (
+          <NavLink key={item.href} {...item} Icon={item.icon} path={path} onNavigate={onNavigate}
+            count={item.href === '/feedback' ? feedback.data?.count : undefined} />
         ))}
         <p className='px-3 pb-2 pt-6 text-[11px] font-semibold uppercase tracking-[.14em] text-muted-foreground'>
           Operations
